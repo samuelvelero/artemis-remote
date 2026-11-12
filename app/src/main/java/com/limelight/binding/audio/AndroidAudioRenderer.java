@@ -20,6 +20,10 @@ public class AndroidAudioRenderer implements AudioRenderer {
 
     private AudioTrack track;
 
+    // Remote-control mode: mute the phone while the host keeps playing the sound
+    public static volatile boolean muted = false;
+    private boolean appliedMuted = false;
+
     public AndroidAudioRenderer(Context context, boolean enableAudioFx) {
         this.context = context;
         this.enableAudioFx = enableAudioFx;
@@ -192,6 +196,10 @@ public class AndroidAudioRenderer implements AudioRenderer {
             // This will block until the write is completed. That can cause a backlog
             // of pending audio data, so we do the above check to be able to bound
             // latency at 40 ms in that situation.
+            if (muted != appliedMuted) {
+                appliedMuted = muted;
+                track.setVolume(appliedMuted ? 0f : 1f);
+            }
             track.write(audioData, 0, audioData.length);
         }
         else {

@@ -281,6 +281,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private ArrayList<String> serverCommands;
 
     private ViewParent rootView;
+
+    // Portrait remote-control mode (Artemis Remote)
+    private boolean remoteMode = false;
+    private com.limelight.remote.RemotePanel remotePanel;
     private ClipboardManager clipboardManager;
     private boolean clipboardSyncRunning = false;
 
@@ -419,14 +423,25 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 prefConfig.videoScaleMode = PreferenceConfiguration.ScaleMode.STRETCH;
             }
 
-            if (prefConfig.autoOrientation) {
+            remoteMode = com.limelight.remote.RemotePrefs.isEnabled(this);
+
+            if (remoteMode) {
+                // Remote-control mode: the phone is held upright while the game is on the TV
+                currentOrientation = Configuration.ORIENTATION_PORTRAIT;
+                prefConfig.enableFloatingButton = false;
+                prefConfig.showOverlayZoomToggleButton = false;
+                prefConfig.onscreenController = false;
+                // Keep the sound on the PC/TV; the phone copy is muted unless toggled on
+                prefConfig.playHostAudio = true;
+            } else if (prefConfig.autoOrientation) {
                 currentOrientation = getResources().getConfiguration().orientation;
             } else {
                 currentOrientation = Configuration.ORIENTATION_LANDSCAPE;
             }
 
             boolean portraitMode = currentOrientation == Configuration.ORIENTATION_PORTRAIT;
-            shouldInvertDecoderResolution = portraitMode && prefConfig.autoInvertVideoResolution;
+            // In remote mode the host keeps its landscape resolution
+            shouldInvertDecoderResolution = portraitMode && prefConfig.autoInvertVideoResolution && !remoteMode;
 
             displayWidth = shouldInvertDecoderResolution ? prefConfig.height : prefConfig.width;
             displayHeight = shouldInvertDecoderResolution ? prefConfig.width : prefConfig.height;
@@ -464,6 +479,12 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         streamContainer.setCommitTextEnabled(prefConfig.enableCommitText);
 
         rootView = streamContainer.getParent();
+
+        if (remoteMode) {
+            remotePanel = new com.limelight.remote.RemotePanel(this);
+            ((android.view.ViewGroup) rootView).addView(remotePanel, new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        }
 
         //串流画面 顶部居中显示
         if(prefConfig.alignDisplayTopCenter){
@@ -1704,6 +1725,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         instance = null;
         timerHandler.removeCallbacksAndMessages(null);
+
+        if (remotePanel != null) {
+            remotePanel.release();
+        }
+        com.limelight.binding.audio.AndroidAudioRenderer.muted = false;
 
         if (prefConfig.enableFullExDisplay) handleDisplayRemoved();
 
@@ -4026,6 +4052,29 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             currentOrientation = Configuration.ORIENTATION_LANDSCAPE;
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
         }
+
+        if (remotePanel != null) {
+            // The remote panel only exists in portrait; landscape is the plain stream
+            boolean portrait = currentOrientation == Configuration.ORIENTATION_PORTRAIT;
+            remotePanel.setActive(portrait);
+            if (!portrait) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) streamContainer.getLayoutParams();
+                params.gravity = Gravity.CENTER;
+                params.topMargin = 0;
+                streamContainer.setLayoutParams(params);
+            }
+        }
+    }
+
+    /** Pins the stream below the remote panel's top bar (portrait remote mode). */
+    public void setRemoteStreamTop(int topPx) {
+        if (streamContainer == null) {
+            return;
+        }
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) streamContainer.getLayoutParams();
+        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+        params.topMargin = topPx;
+        streamContainer.setLayoutParams(params);
     }
 
     /**

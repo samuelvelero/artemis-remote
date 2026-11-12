@@ -1,3 +1,27 @@
+# Artemis Remote
+
+Fork of [Artemis Android](https://github.com/ClassicOldSong/moonlight-android) that turns the phone into a
+portrait "remote control" for a PC that is being played on a TV.
+
+When a stream starts, the phone stays upright and shows:
+
+- **Top bar** – Artemis menu, `Video` (show/hide the stream above the trackpad), `Audio` (phone audio is muted by
+  default; the sound keeps playing on the PC/TV), `Texto` (type, dictate or paste a long text with your normal
+  keyboard and send it to the PC), power menu (restart the PC) and settings.
+- **Trackpad** – one finger moves the cursor, tap = click, two-finger tap = right click, three-finger tap = middle
+  click, two-finger drag = scroll, double-tap-and-drag = drag/select. Sensitivity and acceleration are adjustable.
+- **Shortcut bar** – Alt+Tab, Alt+F4, Ctrl+Shift+Esc, Win+Tab, copy/paste/cut/undo/select all; editable.
+- **ESC / F1–F12 row** – plus Supr, Ins, Inicio, Fin, RePág, AvPág, ImpPt (scrolls horizontally).
+- **Gboard-style keyboard** (Spanish Latin America) – number row, `ñ`, accents on long press, symbols layer,
+  sticky `Ctrl` / `Win` / `Alt` (tap = next key only, tap again = locked), `Tab` and arrow keys. No numpad.
+
+Key vibration, click sound, key popup, key height and screen dimming are configurable from the ⚙ button. The mode
+can be turned off in Settings → "Control remoto" to get the stock Artemis stream back.
+
+The code of the remote mode lives in `app/src/main/java/com/limelight/remote/`.
+
+---
+
 # Artemis Android
 
 Previously named Moonlight Noir

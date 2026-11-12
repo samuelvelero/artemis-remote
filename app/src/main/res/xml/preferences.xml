@@ -5,6 +5,18 @@
     app:iconSpaceReserved="false">
 
     <PreferenceCategory
+        android:key="category_remote_mode"
+        android:title="Control remoto"
+        app:iconSpaceReserved="false">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="remote_mode_enabled"
+            android:title="Modo control remoto vertical"
+            android:summary="Abre el stream en vertical con trackpad y teclado de PC (ESC, F1–F12, Ctrl, Alt, Win). Desactívalo para usar el stream normal de Artemis."
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="category_video_settings"
         android:title="@string/category_video_settings"
         app:initialExpandedChildrenCount="3"
