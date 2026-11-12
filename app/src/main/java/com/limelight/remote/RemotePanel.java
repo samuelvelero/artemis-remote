@@ -88,7 +88,7 @@ public class RemotePanel extends LinearLayout implements RemoteKeyboardView.Sink
             toast(prefs.phoneAudio ? "Audio del PC en el celular" : "Audio del celular silenciado");
         });
         addChip(topBar, "Texto", 1, v -> showSendTextDialog());
-        addChip(topBar, "⏻", 0, this::showPowerMenu);
+        addChip(topBar, "PC", 0, this::showPowerMenu);
         addChip(topBar, "⚙", 0, v -> showSettingsDialog());
         addView(topBar, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
@@ -104,12 +104,8 @@ public class RemotePanel extends LinearLayout implements RemoteKeyboardView.Sink
         addView(scroller(shortcutRow), new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         rebuildShortcuts();
 
-        // ---- ESC / F-key row
+        // ---- navigation keys (Esc and F1–F12 are the keyboard's top row)
         LinearLayout fRow = new LinearLayout(game);
-        addFKey(fRow, "Esc", Vk.ESC);
-        for (int i = 0; i < 12; i++) {
-            addFKey(fRow, "F" + (i + 1), (short) (Vk.F1 + i));
-        }
         addFKey(fRow, "Supr", Vk.DELETE);
         addFKey(fRow, "Ins", Vk.INSERT);
         addFKey(fRow, "Inicio", Vk.HOME);
@@ -138,7 +134,8 @@ public class RemotePanel extends LinearLayout implements RemoteKeyboardView.Sink
 
         topBar.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
             if (b - t != ob - ot) {
-                applyMode();
+                // Never relayout the stream from inside a layout pass
+                post(this::applyMode);
             }
         });
 

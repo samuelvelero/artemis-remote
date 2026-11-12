@@ -11,8 +11,8 @@ When a stream starts, the phone stays upright and shows:
 - **Trackpad** – one finger moves the cursor, tap = click, two-finger tap = right click, three-finger tap = middle
   click, two-finger drag = scroll, double-tap-and-drag = drag/select. Sensitivity and acceleration are adjustable.
 - **Shortcut bar** – Alt+Tab, Alt+F4, Ctrl+Shift+Esc, Win+Tab, copy/paste/cut/undo/select all; editable.
-- **ESC / F1–F12 row** – plus Supr, Ins, Inicio, Fin, RePág, AvPág, ImpPt (scrolls horizontally).
-- **Gboard-style keyboard** (Spanish Latin America) – number row, `ñ`, accents on long press, symbols layer,
+- **Navigation row** – Supr, Ins, Inicio, Fin, RePág, AvPág, ImpPt.
+- **Gboard-style keyboard** (Spanish Latin America) – Esc + F1–F12 row, number row, `ñ`, accents on long press, symbols layer,
   sticky `Ctrl` / `Win` / `Alt` (tap = next key only, tap again = locked), `Tab` and arrow keys. No numpad.
 
 Key vibration, click sound, key popup, key height and screen dimming are configurable from the ⚙ button. The mode

@@ -4072,7 +4072,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             return;
         }
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) streamContainer.getLayoutParams();
-        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+        int gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+        if (params.gravity == gravity && params.topMargin == topPx) {
+            return;
+        }
+        params.gravity = gravity;
         params.topMargin = topPx;
         streamContainer.setLayoutParams(params);
     }

@@ -59,7 +59,10 @@ public class TrackpadView extends View {
         if (!opaque) {
             return;
         }
-        canvas.drawColor(0xFF121315);
+        // drawRect, not drawColor: the parent does not clip children
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0xFF121315);
+        canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
         float m = 8 * density;
         rect.set(m, m, getWidth() - m, getHeight() - m);
         paint.setStyle(Paint.Style.FILL);

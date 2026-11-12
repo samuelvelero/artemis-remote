@@ -188,11 +188,22 @@ public class RemoteKeyboardView extends View {
         return row(mod("Ctrl", M_CTRL), mod("Win", M_WIN), mod("Alt", M_ALT), tab, left, up, down, right);
     }
 
+    /** Esc + F1–F12, always on screen as the top row of every layer. */
+    private List<Key> functionRow() {
+        List<Key> l = new ArrayList<>();
+        l.add(func("Esc", Vk.ESC, 1.4f, false));
+        for (int i = 0; i < 12; i++) {
+            l.add(func("F" + (i + 1), Vk.F1 + i, 1f, false));
+        }
+        return l;
+    }
+
     private void buildLayers() {
         Key enie = ch("ñ");
         enie.vk = Vk.OEM_3;
         enie.letter = true;
 
+        letters.add(functionRow());
         letters.add(numberRow());
         letters.add(row(letter('q'), letter('w'), letter('e', "é", "€"), letter('r'), letter('t'),
                 letter('y'), letter('u', "ú", "ü"), letter('i', "í"), letter('o', "ó"), letter('p')));
@@ -204,6 +215,7 @@ public class RemoteKeyboardView extends View {
         letters.add(spaceRow("?123"));
         letters.add(pcRow());
 
+        symbols.add(functionRow());
         symbols.add(numberRow());
         symbols.add(row(ch("@"), ch("#"), ch("$", "€", "£"), ch("_"), ch("&"), ch("-", "~", "–", "—"),
                 ch("+", "±"), ch("("), ch(")"), ch("/")));
@@ -220,8 +232,22 @@ public class RemoteKeyboardView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int w = MeasureSpec.getSize(widthMeasureSpec);
-        int h = (int) (letters.size() * prefs.keyHeightDp * density + 6 * density);
+        int h = (int) (totalRowWeight(letters) * prefs.keyHeightDp * density + 6 * density);
         setMeasuredDimension(w, h);
+    }
+
+    private static final float FUNCTION_ROW_WEIGHT = 0.8f;
+
+    private static float rowWeight(int index) {
+        return index == 0 ? FUNCTION_ROW_WEIGHT : 1f;
+    }
+
+    private static float totalRowWeight(List<List<Key>> rows) {
+        float t = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            t += rowWeight(i);
+        }
+        return t;
     }
 
     @Override
@@ -232,9 +258,11 @@ public class RemoteKeyboardView extends View {
 
     private void layoutKeys(List<List<Key>> rows, int w, int h) {
         float pad = 3 * density;
-        float rowH = (h - 2 * pad) / rows.size();
+        float unitH = (h - 2 * pad) / totalRowWeight(rows);
         float y = pad;
-        for (List<Key> row : rows) {
+        for (int ri = 0; ri < rows.size(); ri++) {
+            List<Key> row = rows.get(ri);
+            float rowH = unitH * rowWeight(ri);
             float total = 0;
             for (Key k : row) {
                 total += k.weight;
@@ -259,7 +287,11 @@ public class RemoteKeyboardView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawColor(C_BG);
+        // Not drawColor(): the panel does not clip children (so key popups can overflow
+        // upwards), and drawColor would paint over every view above the keyboard.
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(C_BG);
+        canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
         float gapX = 2.5f * density, gapY = 4 * density, radius = 6 * density;
         boolean upper = mods[M_SHIFT] != OFF;
 
@@ -296,7 +328,11 @@ public class RemoteKeyboardView extends View {
                 paint.setTextAlign(Paint.Align.CENTER);
                 paint.setTypeface(Typeface.DEFAULT);
                 boolean small = label.length() > 1;
-                paint.setTextSize((small ? 13 : (k.type == T_CHAR ? 21 : 19)) * density);
+                float size = small ? 13 : (k.type == T_CHAR ? 21 : 19);
+                if (small && tmp.width() < 34 * density) {
+                    size = 11.5f; // narrow F-keys
+                }
+                paint.setTextSize(size * density);
                 float ty = tmp.centerY() - (paint.descent() + paint.ascent()) / 2;
                 canvas.drawText(label, tmp.centerX(), ty, paint);
 
